@@ -24,4 +24,5 @@ jobs:
       - uses: jdx/mise-action@v2
         with:
           install: false
+          experimental: true
       - run: mise run test

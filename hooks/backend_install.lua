@@ -30,7 +30,6 @@ function PLUGIN:BackendInstall(ctx)
 
     -- Download the tool
     local temp_file = install_path .. "/" .. tool
-    print(platform)
     local resp, err = http.download_file({
         url = download_url,
     }, temp_file)

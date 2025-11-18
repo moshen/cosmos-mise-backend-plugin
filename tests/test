@@ -13,27 +13,35 @@ echo "Testing plugin linking and basic functionality..."
 
 # Try to list available versions for a test tool
 TEST_TOOL="make"
+EXIT_CODE=0
 
 echo "Testing version listing for ${TEST_TOOL}..."
-if mise ls-remote cosmos:${TEST_TOOL} 2>/dev/null; then
+if mise --debug ls-remote cosmos:${TEST_TOOL}; then
     echo "✓ Version listing works"
 else
-    echo "⚠ Version listing failed - implement backend_list_versions.lua for your backend"
+    echo "⚠ Version listing failed"
+    EXIT_CODE=1
 fi
 
 # Test installation if versions are available
 echo "Testing installation..."
-if mise install cosmos:${TEST_TOOL}@latest 2>/dev/null; then
+if mise --debug install cosmos:${TEST_TOOL}@latest; then
     echo "✓ Installation works"
     
     # Test that the tool can be executed
-    if mise exec cosmos:${TEST_TOOL}@latest -- ${TEST_TOOL} --version 2>/dev/null; then
+    if mise exec cosmos:${TEST_TOOL}@latest -- ${TEST_TOOL} --version; then
         echo "✓ Tool execution works"
     else
-        echo "⚠ Tool execution failed - check backend_exec_env.lua implementation"
+        echo "⚠ Tool execution failed"
+        EXIT_CODE=1
     fi
 else
     echo "⚠ Installation failed"
+    EXIT_CODE=1
 fi
 
-echo "✓ Basic plugin structure tests completed"
+if [[ $EXIT_CODE -eq 0 ]]; then
+    echo "✓ Basic plugin structure tests completed"
+fi
+
+exit $EXIT_CODE

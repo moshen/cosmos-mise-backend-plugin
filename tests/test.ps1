@@ -18,26 +18,40 @@ Write-Host "Testing plugin linking and basic functionality..."
 
 $TEST_TOOL = 'make'
 Write-Host "Testing version listing for $TEST_TOOL..."
-try {
-    & mise ls-remote "cosmos:$TEST_TOOL" 2>$null | Out-Null
+
+# Exit-code tracking (0 = success, 1 = failure)
+$EXIT_CODE = 0
+
+# Try listing remote versions; check $LASTEXITCODE to determine success
+& mise --debug ls-remote "cosmos:$TEST_TOOL"
+if ($LASTEXITCODE -eq 0) {
     Write-Host "✓ Version listing works"
-} catch {
-    Write-Host "⚠ Version listing failed - implement backend_list_versions.lua for your backend"
+} else {
+    Write-Host "⚠ Version listing failed"
+    $EXIT_CODE = 1
 }
 
 Write-Host "Testing installation..."
-try {
-    & mise install "cosmos:$TEST_TOOL@latest" 2>$null | Out-Null
+
+& mise --debug install "cosmos:$TEST_TOOL@latest"
+if ($LASTEXITCODE -eq 0) {
     Write-Host "✓ Installation works"
 
-    try {
-        & mise exec "cosmos:$TEST_TOOL@latest" -- $TEST_TOOL --version 2>$null | Out-Null
+    # Test that the tool can be executed
+    & mise exec "cosmos:$TEST_TOOL@latest" -- $TEST_TOOL --version
+    if ($LASTEXITCODE -eq 0) {
         Write-Host "✓ Tool execution works"
-    } catch {
-        Write-Host "⚠ Tool execution failed - check backend_exec_env.lua implementation"
+    } else {
+        Write-Host "⚠ Tool execution failed"
+        $EXIT_CODE = 1
     }
-} catch {
+} else {
     Write-Host "⚠ Installation failed"
+    $EXIT_CODE = 1
 }
 
-Write-Host "✓ Basic plugin structure tests completed"
+if ($EXIT_CODE -eq 0) {
+    Write-Host "✓ Basic plugin structure tests completed"
+}
+
+exit $EXIT_CODE
