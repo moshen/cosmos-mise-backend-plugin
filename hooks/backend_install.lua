@@ -35,7 +35,7 @@ function PLUGIN:BackendInstall(ctx)
         url = download_url,
     }, temp_file)
     if platform == "windows" then
-        file.symlink(temp_file .. ".exe", temp_file)
+        file.symlink(temp_file, temp_file .. ".exe")
     end
 
     if err then
